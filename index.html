@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Excel Functions — Final Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F7F5; --paper:#FFFFFF; --ink:#15211B; --muted:#5B6B62; --line:#D6E1DB; --grid:#E8EFEB;
+  --green:#1D6B45; --green-soft:#E3F1E9; --green-ink:#FFFFFF;
+  --ok:#1C7A45; --ok-soft:#DDF3E5; --bad:#B3261E; --bad-soft:#FBE3E1; --warn:#A8620F; --warn-soft:#FDF0DC;
+  --formula:#F7FAF8; --shadow:0 1px 0 rgba(21,33,27,.06);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1512; --paper:#16201B; --ink:#E4EDE8; --muted:#95A69C; --line:#2A3831; --grid:#1D2923;
+    --green:#3FA56E; --green-soft:#1B3527; --green-ink:#07130D;
+    --ok:#4CC282; --ok-soft:#173826; --bad:#F2766B; --bad-soft:#3A1C1A; --warn:#E6A34C; --warn-soft:#3A2A14;
+    --formula:#121A16;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1512; --paper:#16201B; --ink:#E4EDE8; --muted:#95A69C; --line:#2A3831; --grid:#1D2923;
+  --green:#3FA56E; --green-soft:#1B3527; --green-ink:#07130D;
+  --ok:#4CC282; --ok-soft:#173826; --bad:#F2766B; --bad-soft:#3A1C1A; --warn:#E6A34C; --warn-soft:#3A2A14;
+  --formula:#121A16;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 88px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Figtree",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.5}
+button,input{font:inherit}
+.mono{font-family:"JetBrains Mono",ui-monospace,Consolas,monospace}
+:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+
+/* ---------- Start screen ---------- */
+#start{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
+.start-card{background:var(--paper);border:1px solid var(--line);border-radius:14px;max-width:620px;width:100%;overflow:hidden}
+.start-bar{display:flex;align-items:stretch;border-bottom:1px solid var(--line);font-family:"JetBrains Mono",monospace;font-size:14px}
+.start-bar .cell-ref{padding:10px 14px;border-right:1px solid var(--line);color:var(--muted);min-width:64px}
+.start-bar .fx{padding:10px 12px;border-right:1px solid var(--line);color:var(--green);font-style:italic;font-weight:600}
+.start-bar .val{padding:10px 14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.start-body{padding:28px 28px 30px}
+.start-body h1{font-size:clamp(28px,5vw,38px);line-height:1.1;margin:0 0 8px;font-weight:800;letter-spacing:-.02em}
+.start-body p.lead{color:var(--muted);margin:0 0 22px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:22px}
+.facts div{padding:12px 14px;border-right:1px solid var(--line)}
+.facts div:last-child{border-right:0}
+.facts b{display:block;font-size:22px;font-weight:800}
+.facts span{font-size:13px;color:var(--muted)}
+.rules{margin:0 0 22px;padding-left:20px;color:var(--ink)}
+.rules li{margin:4px 0}
+.field{display:block;margin-bottom:14px}
+.field span{display:block;font-size:14px;font-weight:600;margin-bottom:6px}
+.field input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.field input:focus{border-color:var(--green);outline:none;box-shadow:0 0 0 3px var(--green-soft)}
+.err{color:var(--bad);font-size:14px;min-height:20px;margin:0 0 8px}
+.btn{border:0;border-radius:8px;padding:13px 22px;font-weight:700;cursor:pointer;background:var(--green);color:var(--green-ink)}
+.btn:hover{filter:brightness(1.07)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.wide{width:100%}
+
+/* ---------- Top bar ---------- */
+#app{display:none}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--paper);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px}
+.brand{font-weight:800;font-size:17px;line-height:1.2}
+.brand small{display:block;font-weight:500;color:var(--muted);font-size:13px}
+.spacer{flex:1}
+.progress-wrap{min-width:140px}
+.progress-wrap .lbl{font-size:13px;color:var(--muted)}
+.progress{height:6px;background:var(--grid);border-radius:4px;overflow:hidden;margin-top:4px}
+.progress i{display:block;height:100%;width:0;background:var(--green);transition:width .25s}
+.timer{font-family:"JetBrains Mono",monospace;font-weight:600;font-size:22px;padding:6px 12px;border-radius:8px;background:var(--green-soft);color:var(--green);min-width:96px;text-align:center}
+.timer.warn{background:var(--warn-soft);color:var(--warn)}
+.timer.danger{background:var(--bad-soft);color:var(--bad);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.6}}
+@media (prefers-reduced-motion:reduce){.timer.danger{animation:none}.progress i{transition:none}}
+
+/* ---------- Layout ---------- */
+.layout{max-width:1180px;margin:0 auto;padding:20px 16px 60px;display:grid;grid-template-columns:260px 1fr;gap:24px;align-items:start}
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 84px)}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px}
+.panel h3{margin:0 0 10px;font-size:15px}
+.navgrid{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.navgrid button{aspect-ratio:1.35;border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper);color:var(--ink);font-family:"JetBrains Mono",monospace;font-size:13px;cursor:pointer;padding:0}
+.navgrid button:hover{background:var(--grid)}
+.navgrid button.done{background:var(--green);color:var(--green-ink)}
+.navgrid button.ok{background:var(--ok-soft);color:var(--ok);font-weight:600}
+.navgrid button.bad{background:var(--bad-soft);color:var(--bad);font-weight:600}
+.navgrid button.skip{background:var(--warn-soft);color:var(--warn)}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:13px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-1px;background:var(--c);border:1px solid var(--line)}
+.side .btn{margin-top:14px}
+
+/* ---------- Sections & questions ---------- */
+.level{margin:6px 0 14px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.level h2{margin:0;font-size:22px;font-weight:800;letter-spacing:-.01em}
+.level p{margin:0;color:var(--muted);font-size:14px}
+.level + .q{margin-top:0}
+.section{margin-bottom:34px}
+.q{background:var(--paper);border:1px solid var(--line);border-radius:12px;margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow)}
+.q-head{display:flex;gap:12px;padding:16px 18px 10px;align-items:flex-start}
+.q-no{font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:2px 7px;flex:none;margin-top:2px}
+.q-text{font-weight:600;font-size:17px}
+.fbar{margin:0 18px 12px;display:flex;border:1px solid var(--line);border-radius:8px;background:var(--formula);overflow:hidden}
+.fbar .fx{padding:9px 11px;border-right:1px solid var(--line);color:var(--green);font-style:italic;font-weight:600;font-family:"JetBrains Mono",monospace;flex:none}
+.fbar code{padding:9px 12px;font-family:"JetBrains Mono",monospace;font-size:14.5px;white-space:pre-wrap;word-break:break-word}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 18px 16px}
+.opt{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer;background:var(--paper);text-align:left;color:var(--ink);width:100%}
+.opt:hover{border-color:var(--green)}
+.opt .k{flex:none;width:26px;height:26px;display:grid;place-items:center;border-radius:5px;background:var(--grid);font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:600}
+.opt .t{white-space:pre-wrap;word-break:break-word}
+.opts.mono .t{font-family:"JetBrains Mono",monospace;font-size:13.5px}
+.opts.mono{grid-template-columns:1fr}
+.opt.sel{border-color:var(--green);background:var(--green-soft)}
+.opt.sel .k{background:var(--green);color:var(--green-ink)}
+.opt[disabled]{cursor:default}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.right .k{background:var(--ok);color:var(--paper)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt.wrong .k{background:var(--bad);color:var(--paper)}
+.opt .tag{margin-left:auto;font-size:12px;font-weight:700;padding-left:8px;flex:none}
+.opt.right .tag{color:var(--ok)} .opt.wrong .tag{color:var(--bad)}
+.explain{display:none;margin:0 18px 16px;padding:11px 14px;border-left:3px solid var(--green);background:var(--grid);border-radius:0 8px 8px 0;font-size:15px}
+.q.revealed .explain{display:block}
+.q .status{margin-left:auto;font-size:13px;font-weight:700;flex:none;display:none;padding:2px 8px;border-radius:5px}
+.q.revealed .status{display:inline-block}
+.q.is-ok .status{background:var(--ok-soft);color:var(--ok)}
+.q.is-bad .status{background:var(--bad-soft);color:var(--bad)}
+.q.is-skip .status{background:var(--warn-soft);color:var(--warn)}
+.bottom-submit{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.bottom-submit p{margin:0;flex:1;min-width:200px;color:var(--muted)}
+
+/* ---------- Result ---------- */
+#result{display:none;margin-bottom:28px}
+.result{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.result-top{display:grid;grid-template-columns:auto 1fr;gap:24px;padding:24px;align-items:center}
+.score{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;text-align:center;border:10px solid var(--c);background:var(--paper)}
+.score b{font-size:40px;font-weight:800;line-height:1}
+.score span{display:block;font-size:14px;color:var(--muted)}
+.verdict{font-size:28px;font-weight:800;margin:0 0 4px;color:var(--c)}
+.result-top p{margin:0 0 4px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line)}
+.stats div{padding:14px 18px;border-right:1px solid var(--line)}
+.stats div:last-child{border-right:0}
+.stats b{display:block;font-size:22px}
+.stats span{font-size:13px;color:var(--muted)}
+.bylevel{border-top:1px solid var(--line);padding:14px 18px;display:flex;gap:22px;flex-wrap:wrap;font-size:15px}
+.filters{border-top:1px solid var(--line);padding:12px 18px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.filters span{font-size:14px;color:var(--muted);margin-right:4px}
+.chip{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:20px;padding:6px 14px;cursor:pointer;font-size:14px}
+.chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+/* ---------- Modal ---------- */
+.modal{position:fixed;inset:0;background:rgba(10,18,14,.55);display:none;place-items:center;z-index:50;padding:16px}
+.modal.open{display:grid}
+.modal-box{background:var(--paper);border-radius:14px;max-width:420px;width:100%;padding:24px;border:1px solid var(--line)}
+.modal-box h3{margin:0 0 8px;font-size:21px}
+.modal-box p{margin:0 0 18px;color:var(--muted)}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .side{position:static;order:-1}
+  .navgrid{grid-template-columns:repeat(10,1fr)}
+  .side .btn{display:none}
+}
+@media (max-width:600px){
+  .opts{grid-template-columns:1fr}
+  .topbar-in{gap:10px;flex-wrap:wrap}
+  .progress-wrap{order:3;flex-basis:100%}
+  .brand small{display:none}
+  .timer{font-size:19px;min-width:84px}
+  .facts{grid-template-columns:1fr 1fr 1fr}
+  .facts b{font-size:18px}
+  .start-body{padding:22px 18px}
+  .result-top{grid-template-columns:1fr;justify-items:center;text-align:center}
+  .stats{grid-template-columns:1fr 1fr}
+  .stats div:nth-child(2){border-right:0}
+  .stats div:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .navgrid{grid-template-columns:repeat(10,1fr)}
+  .navgrid button{font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<!-- ========== START SCREEN ========== -->
+<section id="start">
+  <div class="start-card">
+    <div class="start-bar">
+      <div class="cell-ref">A1</div>
+      <div class="fx">fx</div>
+      <div class="val">=FINAL_TEST("Excel Functions")</div>
+    </div>
+    <div class="start-body">
+      <h1>Excel Functions<br>Final Test</h1>
+      <p class="lead">Basic and conditional, text, date and time, and lookup functions.</p>
+      <div class="facts">
+        <div><b>50</b><span>Questions</span></div>
+        <div><b>30 min</b><span>Time limit</span></div>
+        <div><b>25 / 50</b><span>Pass marks</span></div>
+      </div>
+      <ul class="rules">
+        <li>Each question has one correct answer and carries 1 mark. No negative marking.</li>
+        <li>Questions go from easy to medium to difficult.</li>
+        <li>You can change an answer any time before you submit.</li>
+        <li>When the timer reaches 0:00, the test submits automatically.</li>
+        <li>After submitting, you'll see your marks and the correct answers.</li>
+      </ul>
+      <label class="field"><span>Student name</span><input id="sname" type="text" autocomplete="name" placeholder="Enter your full name"></label>
+      <label class="field"><span>Roll number (optional)</span><input id="sroll" type="text" placeholder="e.g. 24-EX-017"></label>
+      <p class="err" id="startErr"></p>
+      <button class="btn wide" id="startBtn">Start test</button>
+    </div>
+  </div>
+</section>
+
+<!-- ========== TEST ========== -->
+<div id="app">
+  <header class="topbar">
+    <div class="topbar-in">
+      <div class="brand">Excel Functions — Final Test<small id="who"></small></div>
+      <div class="spacer"></div>
+      <div class="progress-wrap">
+        <div class="lbl" id="progLbl">0 of 50 answered</div>
+        <div class="progress"><i id="progBar"></i></div>
+      </div>
+      <div class="timer" id="timer" aria-live="off">30:00</div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="side">
+      <div class="panel">
+        <h3 id="navTitle">Question map</h3>
+        <div class="navgrid" id="navgrid"></div>
+        <div class="legend" id="legend">
+          <span style="--c:var(--green)">Answered</span>
+          <span style="--c:var(--paper)">Not answered</span>
+        </div>
+        <button class="btn wide" id="sideSubmit">Submit test</button>
+      </div>
+    </aside>
+
+    <main>
+      <section id="result"></section>
+      <div id="questions"></div>
+      <div class="bottom-submit" id="bottomSubmit">
+        <p>Check the question map for anything you've missed, then submit.</p>
+        <button class="btn" id="submitBtn">Submit test</button>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ========== CONFIRM MODAL ========== -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="modal-box">
+    <h3 id="mTitle">Submit your test?</h3>
+    <p id="mText"></p>
+    <div class="modal-actions">
+      <button class="btn ghost" id="mCancel">Keep working</button>
+      <button class="btn" id="mOk">Submit test</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+/* ---------------- EASY (1–17) ---------------- */
+{d:"e",q:"Cells A1:A5 contain 2, 4, 6, 8 and 10. What does this formula return?",c:"=SUM(A1:A5)",o:["10","20","30","5"],a:2,x:"SUM adds every number in the range: 2 + 4 + 6 + 8 + 10 = 30."},
+{d:"e",q:"What is the result of this formula?",c:"=AVERAGE(10,20,30,40)",o:["100","25","4","40"],a:1,x:"AVERAGE = total ÷ count = 100 ÷ 4 = 25."},
+{d:"e",q:"What is the result of this formula?",c:"=MIN(8,3,12,5)",o:["12","8","5","3"],a:3,x:"MIN returns the smallest value, which is 3."},
+{d:"e",q:"What does the MAX function return?",o:["The largest number in a range","The total of a range","The number of cells in a range","The most repeated value"],a:0,x:"MAX returns the highest numeric value in the range."},
+{d:"e",q:"Which cells does the COUNT function count?",o:["All non-empty cells","Only cells that contain numbers","Only empty cells","Only cells that contain text"],a:1,x:"COUNT counts cells with numbers (dates count too, because Excel stores them as numbers). Text and blanks are ignored."},
+{d:"e",q:"Which function counts all cells that are not empty, including text?",o:["COUNT","COUNTBLANK","COUNTA","SUM"],a:2,x:"COUNTA counts every non-empty cell: numbers, text, TRUE/FALSE and errors."},
+{d:"e",q:"A1:A6 contain: 5, \"Ali\", (empty), 7, (empty), TRUE. What does this formula return?",c:"=COUNTBLANK(A1:A6)",o:["2","4","1","6"],a:0,x:"Only A3 and A5 are empty, so COUNTBLANK returns 2."},
+{d:"e",q:"What is the result of this formula?",c:"=UPPER(\"excel\")",o:["Excel","excel","EXCEL","eXCEL"],a:2,x:"UPPER converts every letter to a capital letter."},
+{d:"e",q:"What is the result of this formula?",c:"=LEN(\"Hello World\")",o:["10","11","2","12"],a:1,x:"LEN counts every character including the space: 5 + 1 + 5 = 11."},
+{d:"e",q:"What does the TODAY() function return?",o:["The current date and time","Only the current time","The current date","The day name, e.g. Monday"],a:2,x:"TODAY returns only today's date. NOW returns the date and the time."},
+{d:"e",q:"What is the result of this formula?",c:"=LEFT(\"Pakistan\",3)",o:["\"tan\"","\"Pak\"","\"Pakistan\"","\"kis\""],a:1,x:"LEFT returns the given number of characters from the start of the text: \"Pak\"."},
+{d:"e",q:"Cell A1 contains 50. What does this formula return?",c:"=IF(A1>=50,\"Pass\",\"Fail\")",o:["\"Fail\"","TRUE","0","\"Pass\""],a:3,x:"50 >= 50 is TRUE, so IF returns the value_if_true: \"Pass\"."},
+{d:"e",q:"What is the result of this formula?",c:"=AND(5>3, 2>4)",o:["FALSE","TRUE","#VALUE!","1"],a:0,x:"AND is TRUE only when every condition is TRUE. 2>4 is FALSE, so the result is FALSE."},
+{d:"e",q:"What is the result of this formula?",c:"=OR(5>3, 2>4)",o:["FALSE","TRUE","#N/A","0"],a:1,x:"OR is TRUE when at least one condition is TRUE. 5>3 is TRUE."},
+{d:"e",q:"What is the result of this formula?",c:"=MONTH(DATE(2024,3,15))",o:["15","2024","3","March"],a:2,x:"MONTH returns the month number (1–12) of a date. Here it is 3."},
+{d:"e",q:"What is the result of this formula?",c:"=PROPER(\"ali khan\")",o:["\"ALI KHAN\"","\"Ali khan\"","\"ali Khan\"","\"Ali Khan\""],a:3,x:"PROPER capitalises the first letter of every word."},
+{d:"e",q:"In VLOOKUP, where does Excel search for the lookup value?",o:["In the first row of the table","In the first column of the table","In the last column of the table","In every cell of the table"],a:1,x:"VLOOKUP searches vertically down the first (leftmost) column of the table."},
+
+/* ---------------- MEDIUM (18–34) ---------------- */
+{d:"m",q:"What does this formula count?",c:"=COUNTIF(B2:B10,\">50\")",o:["Cells in B2:B10 equal to 50","Cells in B2:B10 greater than 50","Cells in B2:B10 less than 50","The total of values greater than 50"],a:1,x:"COUNTIF counts the cells that meet one condition — here, values greater than 50."},
+{d:"m",q:"A2:A5 = Pen, Book, Pen, Bag and B2:B5 = 10, 20, 30, 40. What does this formula return?",c:"=SUMIF(A2:A5,\"Pen\",B2:B5)",o:["10","30","40","100"],a:2,x:"\"Pen\" appears in rows 2 and 4, so SUMIF adds 10 + 30 = 40."},
+{d:"m",q:"What is the result of this formula?",c:"=TRIM(\"  Data   Entry  \")",o:["\"Data Entry\"","\"DataEntry\"","\"Data   Entry\"","\" Data Entry \""],a:0,x:"TRIM removes spaces at the start and end, and reduces multiple spaces between words to a single space."},
+{d:"m",q:"What is the result of this formula?",c:"=MID(\"Microsoft\",6,4)",o:["\"roso\"","\"soft\"","\"osof\"","\"Micr\""],a:1,x:"MID starts at character 6 (s) and takes 4 characters: \"soft\"."},
+{d:"m",q:"What is the result of this formula?",c:"=LOWER(RIGHT(\"EXCEL2025\",6))",o:["\"2025\"","\"el2025\"","\"EL2025\"","\"excel2\""],a:1,x:"RIGHT takes the last 6 characters, \"EL2025\". LOWER then turns it into \"el2025\"."},
+{d:"m",q:"What is the result of this formula?",c:"=CONCAT(\"Data\",\" \",\"Science\")",o:["\"DataScience\"","\"Data, Science\"","\"Data Science\"","#VALUE!"],a:2,x:"CONCAT joins the pieces in order, including the space given as the middle argument."},
+{d:"m",q:"What is the result of this formula?",c:"=TEXTJOIN(\", \",TRUE,\"Red\",\"\",\"Blue\")",o:["\"Red, , Blue\"","\"RedBlue\"","\"Red, Blue\"","\"Red,Blue\""],a:2,x:"TRUE tells TEXTJOIN to ignore empty values, so only Red and Blue are joined with \", \"."},
+{d:"m",q:"What is the result of this formula?",c:"=IFERROR(10/0,\"Error\")",o:["#DIV/0!","0","10","\"Error\""],a:3,x:"10/0 gives #DIV/0!. IFERROR catches the error and returns \"Error\" instead."},
+{d:"m",q:"Which error does the IFNA function catch?",o:["Any error","Only #N/A","Only #DIV/0!","Only #VALUE!"],a:1,x:"IFNA handles only #N/A (common with lookups). Other errors still show. IFERROR catches all errors."},
+{d:"m",q:"A1 contains 65. What does this formula return?",c:"=IFS(A1>=80,\"A\",A1>=60,\"B\",TRUE,\"C\")",o:["\"A\"","\"B\"","\"C\"","#N/A"],a:1,x:"IFS returns the value for the first TRUE condition. 65>=80 is FALSE; 65>=60 is TRUE, so \"B\"."},
+{d:"m",q:"What is the result of this formula?",c:"=DAY(DATE(2024,2,29))",o:["2","29","2024","#VALUE!"],a:1,x:"2024 is a leap year, so 29 Feb 2024 is a valid date. DAY returns 29."},
+{d:"m",q:"What date does this formula return?",c:"=EOMONTH(DATE(2024,1,15),1)",o:["31-Jan-2024","28-Feb-2024","29-Feb-2024","15-Feb-2024"],a:2,x:"EOMONTH moves 1 month forward (February) and returns its last day. 2024 is a leap year, so 29-Feb-2024."},
+{d:"m",q:"What date does this formula return?",c:"=DATE(2024,13,1)",o:["#NUM!","1-Dec-2024","1-Jan-2025","13-Jan-2024"],a:2,x:"Month 13 rolls over into the next year: the 13th month of 2024 is January 2025."},
+{d:"m",q:"A1:D1 contain Jan, Feb, Mar, Apr and A2:D2 contain 100, 150, 200, 250. What does this formula return?",c:"=HLOOKUP(\"Mar\",A1:D2,2,FALSE)",o:["\"Mar\"","3","200","150"],a:2,x:"HLOOKUP finds \"Mar\" in the first row (column C) and returns row 2 of that column: 200."},
+{d:"m",q:"What is the result of this formula?",c:"=MATCH(\"C\",{\"A\",\"B\",\"C\",\"D\"},0)",o:["\"C\"","3","2","TRUE"],a:1,x:"MATCH returns the position of the item, not the item itself. \"C\" is 3rd. The 0 means exact match."},
+{d:"m",q:"Which cell's value does this formula return?",c:"=INDEX(A1:C3,2,3)",o:["B3","C2","B2","C3"],a:1,x:"INDEX(range, row, column): row 2, column 3 of A1:C3 is cell C2."},
+{d:"m",q:"How is COUNTIFS different from COUNTIF?",o:["COUNTIFS counts only text","COUNTIFS takes several conditions, and all of them must be true","COUNTIFS counts a cell if any one condition is true","There is no difference"],a:1,x:"COUNTIFS accepts several range/criteria pairs and counts a row only when every condition is met (AND logic)."},
+
+/* ---------------- DIFFICULT (35–50) ---------------- */
+{d:"h",q:"What does this formula return?",c:"=DATEDIF(DATE(2020,5,10),DATE(2025,5,9),\"Y\")",o:["5","4","60","1825"],a:1,x:"\"Y\" counts complete years only. 9 May 2025 is one day short of 5 full years, so the answer is 4."},
+{d:"h",q:"You want to add C2:C10 where column A is \"North\" and column B is greater than 100. Which formula is correct?",o:["=SUMIFS(A2:A10,\"North\",B2:B10,\">100\",C2:C10)","=SUMIF(C2:C10,A2:A10,\"North\",B2:B10,\">100\")","=SUMIFS(C2:C10,A2:A10,\"North\",B2:B10,\">100\")","=SUMIFS(C2:C10,\"North\",A2:A10,\">100\",B2:B10)"],a:2,mono:true,x:"In SUMIFS the sum range comes first, then criteria_range / criteria pairs. (In SUMIF the sum range comes last.)"},
+{d:"h",q:"A2:A5 = North, South, North, North and B2:B5 = 100, 200, 300, 500. What does this formula return?",c:"=AVERAGEIFS(B2:B5,A2:A5,\"North\",B2:B5,\">150\")",o:["300","400","275","225"],a:1,x:"Rows meeting both conditions: North/300 and North/500. Average = (300 + 500) ÷ 2 = 400."},
+{d:"h",q:"A2:A5 = 0, 50, 70, 90 and B2:B5 = F, C, B, A. What does this formula return?",c:"=VLOOKUP(75,A2:B5,2,TRUE)",o:["\"A\"","#N/A","\"B\"","\"C\""],a:2,x:"TRUE = approximate match. VLOOKUP finds the largest value not greater than 75, which is 70, and returns \"B\". The first column must be sorted ascending."},
+{d:"h",q:"You search in column D, but the value you need is in column B (to the left). Which single function can do this directly?",o:["VLOOKUP","HLOOKUP","XLOOKUP","COUNTIFS"],a:2,x:"VLOOKUP can only return columns to the right of the lookup column. XLOOKUP takes separate lookup and return arrays, so direction doesn't matter."},
+{d:"h",q:"\"Zara\" is not in A2:A5. What does this formula return?",c:"=XLOOKUP(\"Zara\",A2:A5,B2:B5,\"Not Found\")",o:["#N/A","\"Not Found\"","0","#VALUE!"],a:1,x:"The 4th argument of XLOOKUP (if_not_found) is returned when there is no match."},
+{d:"h",q:"A2:A6 = Ali, Bilal, Sara, Hina, Umar. Which cell's value does this formula return?",c:"=INDEX(B2:B6,MATCH(\"Sara\",A2:A6,0))",o:["A4","B3","B4","3"],a:2,x:"MATCH finds Sara at position 3 of A2:A6. INDEX returns the 3rd cell of B2:B6, which is B4."},
+{d:"h",q:"No row meets the condition and the if_empty argument is left out. What does FILTER return?",c:"=FILTER(A2:C10,C2:C10>1000)",o:["An empty cell","0","#N/A","#CALC!"],a:3,x:"When FILTER finds nothing and no if_empty value is given, it returns #CALC!. Adding a 3rd argument like \"No results\" avoids this."},
+{d:"h",q:"A2:C5 is a 3-column range. What does this formula return?",c:"=VLOOKUP(\"Ali\",A2:C5,4,FALSE)",o:["#N/A","#REF!","#VALUE!","0"],a:1,x:"Column index 4 is outside a 3-column table, so VLOOKUP returns #REF!."},
+{d:"h",q:"\"X\" does not exist in A2:A5. What does this formula return?",c:"=IFERROR(VLOOKUP(\"X\",A2:B5,2,FALSE),\"Missing\")",o:["#N/A","\"X\"","\"Missing\"","FALSE"],a:2,x:"VLOOKUP gives #N/A, and IFERROR replaces that error with \"Missing\"."},
+{d:"h",q:"A1 = 45 and B1 = 38. What does this formula return?",c:"=IF(AND(A1>=40,B1>=40),\"Pass\",IF(OR(A1>=40,B1>=40),\"Supply\",\"Fail\"))",o:["\"Pass\"","\"Supply\"","\"Fail\"","FALSE"],a:1,x:"AND is FALSE (38 < 40), so the nested IF runs. OR is TRUE (45 >= 40), so the result is \"Supply\"."},
+{d:"h",q:"What is the result of this formula?",c:"=LEN(TRIM(\"  Hi   there  \"))",o:["14","8","7","9"],a:1,x:"TRIM gives \"Hi there\" (2 + 1 + 5 = 8 characters), so LEN returns 8."},
+{d:"h",q:"What is the result of this formula?",c:"=TEXTJOIN(\"-\",FALSE,\"A\",\"\",\"B\")",o:["\"A-B\"","\"AB\"","\"A--B\"","\"A-,-B\""],a:2,x:"FALSE means empty values are kept, so the empty text still gets a delimiter on each side: \"A--B\"."},
+{d:"h",q:"What date does this formula return?",c:"=EOMONTH(DATE(2025,3,10),-1)",o:["28-Feb-2025","29-Feb-2025","31-Mar-2025","10-Feb-2025"],a:0,x:"-1 moves one month back to February 2025. 2025 is not a leap year, so the last day is 28-Feb-2025."},
+{d:"h",q:"The cell is formatted as General. What does this formula return?",c:"=NOW()-TODAY()",o:["0","1","The current time as a fraction of a day (e.g. 0.5 at 12 noon)","#VALUE!"],a:2,x:"NOW = date + time and TODAY = date only, so the difference is the time part, stored as a decimal fraction of 24 hours."},
+{d:"h",q:"Which XLOOKUP setting makes it search from the last item to the first (e.g. to find the latest entry)?",o:["match_mode = 1","search_mode = -1","match_mode = -1","search_mode = 2"],a:1,x:"search_mode -1 searches last-to-first. match_mode controls exact/approximate/wildcard matching; search_mode 2 is a binary search."}
+];
+
+const LEVELS = {
+  e:{name:"Easy",note:"Questions 1–17 · basic functions"},
+  m:{name:"Medium",note:"Questions 18–34 · conditions, text and dates"},
+  h:{name:"Difficult",note:"Questions 35–50 · multi-condition and lookup"}
+};
+const TOTAL = QUESTIONS.length, PASS = 25, DURATION = 30*60;
+const answers = new Array(TOTAL).fill(null);
+let timeLeft = DURATION, tick = null, submitted = false, student = {name:"",roll:""};
+const $ = id => document.getElementById(id);
+const KEYS = ["A","B","C","D"];
+
+function el(tag, cls, text){ const n=document.createElement(tag); if(cls) n.className=cls; if(text!=null) n.textContent=text; return n; }
+
+/* ---------- Shuffle options (correct answer is tracked) ---------- */
+QUESTIONS.forEach(item=>{
+  const idx=[0,1,2,3];
+  for(let i=idx.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [idx[i],idx[j]]=[idx[j],idx[i]]; }
+  item.o = idx.map(k=>item.o[k]);
+  item.a = idx.indexOf(item.a);
+});
+
+/* ---------- Build questions ---------- */
+function build(){
+  const wrap = $("questions");
+  let current = null, section = null;
+  QUESTIONS.forEach((item, i) => {
+    if(item.d !== current){
+      current = item.d;
+      section = el("div","section");
+      const lv = el("div","level");
+      lv.append(el("h2",null,LEVELS[current].name), el("p",null,LEVELS[current].note.replace(" · "," — ")));
+      section.append(lv);
+      wrap.append(section);
+    }
+    const card = el("article","q"); card.id = "q"+(i+1);
+    const head = el("div","q-head");
+    head.append(el("span","q-no","Q"+(i+1)), el("div","q-text",item.q), el("span","status",""));
+    card.append(head);
+    if(item.c){
+      const fb = el("div","fbar");
+      fb.append(el("span","fx","fx"), el("code",null,item.c));
+      card.append(fb);
+    }
+    const opts = el("div","opts"+(item.mono?" mono":""));
+    opts.setAttribute("role","radiogroup");
+    item.o.forEach((txt, j) => {
+      const b = el("button","opt"); b.type="button";
+      b.setAttribute("role","radio"); b.setAttribute("aria-checked","false");
+      b.append(el("span","k",KEYS[j]), el("span","t",txt), el("span","tag",""));
+      b.addEventListener("click", () => choose(i, j));
+      opts.append(b);
+    });
+    card.append(opts);
+    card.append(el("div","explain",item.x));
+    section.append(card);
+  });
+
+  const nav = $("navgrid");
+  for(let i=0;i<TOTAL;i++){
+    const b = el("button",null,String(i+1)); b.type="button";
+    b.setAttribute("aria-label","Go to question "+(i+1));
+    b.addEventListener("click",()=>{ $("q"+(i+1)).scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto":"smooth", block:"start"}); });
+    nav.append(b);
+  }
+}
+
+function choose(i, j){
+  if(submitted) return;
+  answers[i] = j;
+  const btns = $("q"+(i+1)).querySelectorAll(".opt");
+  btns.forEach((b,k)=>{ b.classList.toggle("sel",k===j); b.setAttribute("aria-checked", k===j ? "true":"false"); });
+  $("navgrid").children[i].classList.add("done");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = answers.filter(a=>a!==null).length;
+  $("progLbl").textContent = n+" of "+TOTAL+" answered";
+  $("progBar").style.width = (n/TOTAL*100)+"%";
+}
+
+/* ---------- Timer ---------- */
+function fmt(s){ const m=Math.floor(s/60), r=s%60; return m+":"+String(r).padStart(2,"0"); }
+function startTimer(){
+  const end = Date.now() + DURATION*1000;
+  const t = $("timer");
+  const run = () => {
+    timeLeft = Math.max(0, Math.round((end - Date.now())/1000));
+    t.textContent = fmt(timeLeft);
+    t.classList.toggle("warn", timeLeft<=300 && timeLeft>60);
+    t.classList.toggle("danger", timeLeft<=60);
+    if(timeLeft<=0){ clearInterval(tick); submit(true); }
+  };
+  run(); tick = setInterval(run, 250);
+}
+
+/* ---------- Submit ---------- */
+function askSubmit(){
+  if(submitted) return;
+  const left = answers.filter(a=>a===null).length;
+  $("mText").textContent = left
+    ? "You have "+left+" unanswered question"+(left>1?"s":"")+". Unanswered questions get 0 marks. After submitting you can't change any answer."
+    : "All 50 questions are answered. After submitting you can't change any answer.";
+  $("modal").classList.add("open");
+  $("mOk").focus();
+}
+function closeModal(){ $("modal").classList.remove("open"); }
+
+function submit(auto){
+  if(submitted) return;
+  submitted = true; clearInterval(tick); closeModal();
+  const used = DURATION - timeLeft;
+  let right=0, wrong=0, skip=0;
+  const lv = {e:[0,0],m:[0,0],h:[0,0]};
+  QUESTIONS.forEach((item,i)=>{
+    const card = $("q"+(i+1)), btns = card.querySelectorAll(".opt"), nb = $("navgrid").children[i];
+    const a = answers[i];
+    lv[item.d][1]++;
+    btns.forEach((b,k)=>{
+      b.disabled = true;
+      b.classList.remove("sel");
+      if(k===item.a){ b.classList.add("right"); b.querySelector(".tag").textContent = "Correct answer"; }
+      if(a===k && k!==item.a){ b.classList.add("wrong"); b.querySelector(".tag").textContent = "Your answer"; }
+    });
+    if(a===item.a){ btns[a].querySelector(".tag").textContent = "Your answer ✓"; }
+    card.classList.add("revealed");
+    nb.classList.remove("done");
+    const st = card.querySelector(".status");
+    if(a===null){ skip++; card.classList.add("is-skip"); nb.classList.add("skip"); st.textContent="Not answered"; card.dataset.r="skip"; }
+    else if(a===item.a){ right++; lv[item.d][0]++; card.classList.add("is-ok"); nb.classList.add("ok"); st.textContent="+1"; card.dataset.r="ok"; }
+    else { wrong++; card.classList.add("is-bad"); nb.classList.add("bad"); st.textContent="0"; card.dataset.r="bad"; }
+  });
+
+  const pct = Math.round(right/TOTAL*100), pass = right>=PASS;
+  const grade = pct>=90?"A+":pct>=80?"A":pct>=70?"B":pct>=60?"C":pct>=50?"D":"F";
+  const c = pass ? "var(--ok)" : "var(--bad)";
+  const r = $("result"); r.innerHTML = "";
+  const box = el("div","result"); box.style.setProperty("--c",c);
+  const top = el("div","result-top");
+  const sc = el("div","score"); const inner = el("div");
+  inner.append(el("b",null,String(right)), el("span",null,"out of "+TOTAL));
+  sc.append(inner);
+  const info = el("div");
+  info.append(el("p","verdict",pass?"Passed":"Not passed"));
+  info.append(el("p",null,(student.name||"Student")+(student.roll?" · Roll no. "+student.roll:"")));
+  info.append(el("p",null,"Percentage: "+pct+"%   Grade: "+grade+"   Pass marks: "+PASS));
+  info.append(el("p",null,(auto?"Time ran out — submitted automatically. ":"")+"Time used: "+fmt(used)));
+  top.append(sc, info);
+  const stats = el("div","stats");
+  [["Correct",right],["Wrong",wrong],["Not answered",skip],["Marks",right+" / "+TOTAL]].forEach(([l,v])=>{
+    const d = el("div"); d.append(el("b",null,String(v)), el("span",null,l)); stats.append(d);
+  });
+  const by = el("div","bylevel");
+  ["e","m","h"].forEach(k=>{ const s=el("div"); s.innerHTML=""; s.append(el("strong",null,LEVELS[k].name+": "), document.createTextNode(lv[k][0]+" / "+lv[k][1])); by.append(s); });
+  const fl = el("div","filters");
+  fl.append(el("span",null,"Show:"));
+  [["all","All questions"],["bad","Wrong"],["skip","Not answered"],["ok","Correct"]].forEach(([k,l],idx)=>{
+    const ch = el("button","chip"+(idx===0?" on":""),l); ch.type="button";
+    ch.addEventListener("click",()=>{
+      fl.querySelectorAll(".chip").forEach(x=>x.classList.remove("on")); ch.classList.add("on");
+      document.querySelectorAll(".q").forEach(q=>{ q.style.display = (k==="all"||q.dataset.r===k) ? "" : "none"; });
+      document.querySelectorAll(".section").forEach(s=>{
+        const any=[...s.querySelectorAll(".q")].some(q=>q.style.display!=="none");
+        s.style.display = any ? "" : "none";
+      });
+    });
+    fl.append(ch);
+  });
+  box.append(top, stats, by, fl);
+  r.append(box); r.style.display="block";
+
+  $("timer").classList.remove("warn","danger");
+  $("timer").textContent = "Done";
+  $("navTitle").textContent = "Results map";
+  $("legend").innerHTML = '<span style="--c:var(--ok-soft)">Correct</span><span style="--c:var(--bad-soft)">Wrong</span><span style="--c:var(--warn-soft)">Not answered</span>';
+  $("sideSubmit").style.display="none";
+  $("bottomSubmit").style.display="none";
+  $("progLbl").textContent = "Score: "+right+" / "+TOTAL;
+  $("progBar").style.width = pct+"%";
+  window.removeEventListener("beforeunload", guard);
+  window.scrollTo({top:0, behavior:"auto"});
+}
+
+function guard(e){ e.preventDefault(); e.returnValue=""; }
+
+/* ---------- Start ---------- */
+$("startBtn").addEventListener("click", ()=>{
+  const name = $("sname").value.trim();
+  if(name.length<2){ $("startErr").textContent = "Enter your name to start the test."; $("sname").focus(); return; }
+  student = {name, roll:$("sroll").value.trim()};
+  $("who").textContent = name + (student.roll ? " · " + student.roll : "");
+  $("start").style.display="none";
+  $("app").style.display="block";
+  window.scrollTo(0,0);
+  startTimer();
+  window.addEventListener("beforeunload", guard);
+});
+$("sname").addEventListener("keydown", e=>{ if(e.key==="Enter") $("startBtn").click(); });
+$("submitBtn").addEventListener("click", askSubmit);
+$("sideSubmit").addEventListener("click", askSubmit);
+$("mCancel").addEventListener("click", closeModal);
+$("mOk").addEventListener("click", ()=>submit(false));
+$("modal").addEventListener("click", e=>{ if(e.target.id==="modal") closeModal(); });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
+
+build();
+</script>
+</body>
+</html>
